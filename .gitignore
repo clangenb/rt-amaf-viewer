@@ -1,0 +1,16 @@
+# Compiled Sources #
+####################
+*.pyc
+*.mp4
+
+# OS Generated Files #
+######################
+__pycache__
+.idea
+*.log
+*.swp
+
+# Tensorflow files   #
+######################
+graphs/
+model/
