@@ -1,7 +1,5 @@
 import configparser
-
 import numpy as np
-from dotstar import Adafruit_DotStar
 
 import visualizer.color_base_functions as cb
 import visualizer.color_base_functions as cbf
@@ -41,7 +39,7 @@ visualizer_types = []
 
 
 class Visualizer:
-    def __init__(self, feature_list, std, type='rasta_shower'):
+    def __init__(self, feature_list, std, tcp_protocol, type='rasta_shower'):
         self.matrix_size = (15, 20)
         self.backgrounder = Backgrounder(std, self.matrix_size)
         self.curr_off_pixels = []
@@ -58,7 +56,7 @@ class Visualizer:
         config.read(config_file)
 
         self.numpixels = 300
-        self.strip = led_strip(numpixels=self.numpixels)
+        self.strip = tcp_strip(tcp_protocol)
 
         self.magnituder = FluxMagnituder(self.strip)
         self.rasta_shower = CoefficientShower(self.strip, len(smile_rastas))
@@ -208,7 +206,14 @@ class Visualizer:
         self.strip.show()
 
 
-def led_strip(numpixels):
-    strip = Adafruit_DotStar(numpixels)
-    strip.begin()
-    return strip
+
+class tcp_strip:
+    def __init__(self, protocol):
+        self._proto = protocol
+
+    def show(self):
+        self._proto.sendLine("show".encode("ascii"))
+
+    def setPixelColor(self, i, color):
+        self._proto.sendLine("{},{}".format(i, color).encode("ascii"))
+
