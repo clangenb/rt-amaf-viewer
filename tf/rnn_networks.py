@@ -3,7 +3,7 @@
 ########################################
 
 import tensorflow as tf
-from tfmodel.zoneout_wrapper import ZoneoutWrapper
+from tf.zoneout_wrapper import ZoneoutWrapper
 
 z_prob_cells = 0.15
 z_prob_states = 0.15

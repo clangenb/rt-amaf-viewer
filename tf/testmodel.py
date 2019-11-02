@@ -7,7 +7,7 @@
 import tensorflow as tf
 import numpy as np
 
-import tfmodel.tensor_loaders as tl
+import tf.tensor_loaders as tl
 import utility.live_helpers as lh
 
 

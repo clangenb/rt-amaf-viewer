@@ -6,7 +6,7 @@ import numpy as np
 from tcp.tcp_server.server_factory import ProducerFactory
 from utility.non_blocking_stream_reader import NonBlockingStreamReader as StreamReader
 import utility.live_helpers as lh
-from tfmodel.predictor import Predictor
+from tf.predictor import Predictor
 from visualizer.visualizer import Visualizer
 
 from params import *

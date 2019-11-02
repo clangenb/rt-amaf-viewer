@@ -3,7 +3,7 @@ import numpy as np
 
 from data.dataset import Dataset
 import data.datahelpers as dh
-from tfmodel.testmodel import TestModel
+from tf.testmodel import TestModel
 from visualizer.color_base_functions import renormalize_angle
 
 path_to_csv = '../data/ComParE_2016_reduced_fsize300_fstep100/'

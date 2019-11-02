@@ -50,7 +50,7 @@ class PredictionListContainer:
             self.pa.extend(pa)
             self.pv.extend(pv)
         else:
-            # in predict.py we only append a float thus extend raises an error
+            # in rt_prediction_animation.py we only append a float thus extend raises an error
             self.pa.append(pa[0])
             self.pv.append(pv[0])
             self.ya.append(ya)

@@ -4,10 +4,10 @@ from joblib import Parallel, delayed
 import tensorflow as tf
 import numpy as np
 
-from tfmodel.rnn_networks import RnnConfig, gaussian_noise_layer
-from tfmodel.trainmodel import TrainModel
-import tfmodel.metrics as metrics
-import tfmodel.init_ops
+from tf.rnn_networks import RnnConfig, gaussian_noise_layer
+from tf.trainmodel import TrainModel
+import tf.metrics as metrics
+import tf.init_ops
 
 from data.dataset import MirexDataSplit
 from utility.time_quantizer import TimeQuantizer
@@ -52,7 +52,7 @@ def train(state_size, num_layers, batch_size, num_outputs, sequence_length, affe
     y = tf.placeholder(tf.float32, [None, None, 2], name='y')
 
     mode = tf.placeholder(tf.string, name='mode')
-    tf_mean_list, tf_std_list = tfmodel.init_ops.mean_std_placeholders()
+    tf_mean_list, tf_std_list = tf.init_ops.mean_std_placeholders()
 
     ########################################################
     # Define Tensorflow operations aka graph nodes
@@ -68,10 +68,10 @@ def train(state_size, num_layers, batch_size, num_outputs, sequence_length, affe
         rmse = metrics.l1diff_rms_error(model.pred, y[:, :, affect_type])
 
     with tf.name_scope('adam_optimizer'):
-        optimizer = tfmodel.init_ops.adam_optimizer(rmse, data.train.num_batches * data.train.num_sequences)
+        optimizer = tf.init_ops.adam_optimizer(rmse, data.train.num_batches * data.train.num_sequences)
 
     with tf.name_scope('feature_means_std'):
-        tf_means, tf_std = tfmodel.init_ops.mean_std_variable(data.train.num_features)
+        tf_means, tf_std = tf.init_ops.mean_std_variable(data.train.num_features)
 
         mean_op = tf_means.assign(tf.reduce_mean(tf.stack(tf_mean_list), axis=0, name='mean_op'))
         std_op = tf_std.assign(tf.reduce_mean(tf.stack(tf_std_list), axis=0, name='std_op'))

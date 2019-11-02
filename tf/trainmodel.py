@@ -4,14 +4,14 @@
 
 import tensorflow as tf
 
-import tfmodel.init_ops
-from tfmodel.rnn_networks import lstm_network
+import tf.init_ops
+from tf.rnn_networks import lstm_network
 
 
 class TrainModel:
     def __init__(self, x, state_shape, rnn_config):
         self.init_state, rnn_tuple_state = \
-            tfmodel.init_ops.init_and_lstm_tuple_state(state_shape)
+            tf.init_ops.init_and_lstm_tuple_state(state_shape)
 
         with tf.variable_scope('lstm_network'):
             lstm_out, self.state = lstm_network(x, rnn_tuple_state, rnn_config)

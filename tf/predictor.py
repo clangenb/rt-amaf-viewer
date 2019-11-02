@@ -7,7 +7,7 @@
 from threading import Thread
 import time
 
-from tfmodel.testmodel import TestModel
+from tf.testmodel import TestModel
 
 
 # default values for command line use

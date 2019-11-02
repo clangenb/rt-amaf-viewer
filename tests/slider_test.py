@@ -6,7 +6,7 @@ import numpy as np
 
 from utility.non_blocking_stream_reader import NonBlockingStreamReader as StreamReader
 import utility.live_helpers as lh
-from tfmodel.predictor import Predictor
+from tf.predictor import Predictor
 from visualizer.visualizer import Visualizer
 from visualizer.patterns.mood_slide_show import MoodSlider
 
