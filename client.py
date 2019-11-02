@@ -6,7 +6,6 @@ from twisted.internet import reactor
 from tcp.tcp_client.client_factory import LedReceiverFactory
 
 
-# this connects the protocol to a server running on port 8000
 def main():
     log.startLogging(sys.stdout)
     log.msg('Starting TCP client')
@@ -15,6 +14,5 @@ def main():
     reactor.run()
 
 
-# this only runs if the module was *not* imported
 if __name__ == '__main__':
     main()
