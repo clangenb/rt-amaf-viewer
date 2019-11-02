@@ -2,7 +2,7 @@ from __future__ import generators
 import numpy as np
 import math
 
-import utility.datahelpers as dh
+import data.datahelpers as dh
 
 # Static parameters
 PATH_TO_CSV = "../data/"      # default directory of the feature files for training

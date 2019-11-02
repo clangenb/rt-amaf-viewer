@@ -6,7 +6,7 @@
 import numpy as np
 import os
 
-from utility.mirex_data_handlers import  generate_metadata
+from data.mirex_data_handlers import  generate_metadata
 
 def create_features_and_labels(feature_sets, include_std=False):
     """

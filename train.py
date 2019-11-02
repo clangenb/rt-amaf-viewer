@@ -9,9 +9,9 @@ from tfmodel.trainmodel import TrainModel
 import tfmodel.metrics as metrics
 import tfmodel.init_ops
 
-from dataset import Dataset, MirexDataSplit
+from data.dataset import MirexDataSplit
 from utility.time_quantizer import TimeQuantizer
-import utility.datahelpers as dh
+import data.datahelpers as dh
 
 
 def save_results(config_str, result):

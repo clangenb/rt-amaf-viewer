@@ -1,12 +1,9 @@
 import tensorflow as tf
 import numpy as np
-import matplotlib.pyplot as plt
 
-from dataset import Dataset
-import utility.datahelpers as dh
+from data.dataset import Dataset
+import data.datahelpers as dh
 from tfmodel.testmodel import TestModel
-from plotters.animations import AnimatedPredictionAndColorPlotter
-import tfmodel.metrics as metrics
 from visualizer.color_base_functions import renormalize_angle
 
 path_to_csv = '../data/ComParE_2016_reduced_fsize300_fstep100/'

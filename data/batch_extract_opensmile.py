@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 from utility.mkdir_p import mkdir_p
-import utility.mirex_data_handlers as mh
+import data.mirex_data_handlers as mh
 
 
 if __name__ == '__main__':

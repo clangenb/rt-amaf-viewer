@@ -4,9 +4,8 @@
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
 
-import utility.mirex_data_handlers as mh
+import data.mirex_data_handlers as mh
 
 comp_path = '../features/ComParE_2016_fsize500_fstep100/2.csv'
 mir_path = '../mirexdatabase/default_features/2.csv'
