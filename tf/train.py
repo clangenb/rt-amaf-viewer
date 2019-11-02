@@ -15,7 +15,7 @@ import data.datahelpers as dh
 
 
 def save_results(config_str, result):
-    f = open('../statistics/bests', 'a+')
+    f = open('../statistics/results.txt', 'a+')
     f.write(config_str + ' ' + result)
     f.close()
 
