@@ -1,7 +1,6 @@
 import configparser
 import numpy as np
 
-import visualizer.color_base_functions as cb
 import visualizer.color_base_functions as cbf
 from utility.time_quantizer import TimeQuantizer
 from visualizer.backgrounds.background import Backgrounder
@@ -9,31 +8,13 @@ from visualizer.patterns.disc_object import Disc
 from visualizer.patterns.flux_magnituder import FluxMagnituder
 from visualizer.patterns.rectangle_object import Rectangle
 from visualizer.patterns.spectrum import CoefficientShower
-
-#################################################################################
-# Feature names of the features extracted from openSMILE
-#################################################################################
-
-config_file = "visualizer_conf.ini"
-
-smile_entropy = 'pcm_fftMag_spectralEntropy_sma'
-smile_centroid = 'pcm_fftMag_spectralCentroid_sma'
-smile_flux = 'pcm_fftMag_spectralFlux_sma'
-smile_hnr = 'logHNR_sma'
-smile_harmonicity = 'pcm_fftMag_spectralHarmonicity_sma'
-smile_rms = 'pcm_RMSenergy_sma'
-smile_delta_rms = 'pcm_RMSenergy_sma_de'
-smile_band250_650 = 'pcm_fftMag_fband250-650_sma'
-smile_rolloff = 'pcm_fftMag_spectralRollOff75.0_sma'
-
-smile_mfccs = ['mfcc_sma[{}]'.format(i) for i in range(1, 14)]
-smile_rastas = ['audSpec_Rfilt_sma[{}]'.format(i) for i in range(26)]
-
+from visualizer.smile_features import HLD
 
 black = 0x000000
-blue = cb.to_hex_color(cb.get_emotion_color_by_angle(220))
-yellow = cb.to_hex_color(cb.get_emotion_color_by_angle(60))
+blue = cbf.to_hex_color(cbf.get_emotion_color_by_angle(220))
+yellow = cbf.to_hex_color(cbf.get_emotion_color_by_angle(60))
 
+config_file = "visualizer_conf.ini"
 
 visualizer_types = []
 
@@ -59,7 +40,7 @@ class Visualizer:
         self.strip = tcp_strip(tcp_protocol)
 
         self.magnituder = FluxMagnituder(self.strip)
-        self.rasta_shower = CoefficientShower(self.strip, len(smile_rastas))
+        self.rasta_shower = CoefficientShower(self.strip, len(HLD.rastas))
         # rec1 = Rectangle(visualizer=self, coordinate=(4, 4), size=(4, 4), led_strip=self.strip)
         # rec2 = Rectangle(visualizer=self, coordinate=(9, 4), size=(2, 2), led_strip=self.strip, color=yellow)
         # rec3 = Rectangle(visualizer=self, coordinate=(14, 4), size=(2, 2), led_strip=self.strip, color=yellow)
@@ -76,11 +57,11 @@ class Visualizer:
             if int(config['features'][key]) == 1 and key in feature_list:
                 self.enabled_features[key] = feature_list.index(key)
 
-        # for mf in smile_mfccs:
+        # for mf in HLD.smile_mfccs:
         #     if mf in feature_list:
         #         self.enabled_features[mf] = feature_list.index(mf)
 
-        # for ra in smile_rastas:
+        # for ra in HLD.smile_rastas:
         #     if ra in feature_list:
         #         self.enabled_features[ra] = feature_list.index(ra)
 
@@ -94,7 +75,7 @@ class Visualizer:
         self.feature_maxima = self.feature_maxima * 0.999
         # rastas = self._get_rastas(llds)
 
-        if smile_flux in self.enabled_features:
+        if HLD.flux in self.enabled_features:
             flux, centroid, rms, entropy, flux_max, energy_max, \
             energy_delta, spec_rolloff, hnr = self._get_features(llds)
 
@@ -126,25 +107,25 @@ class Visualizer:
             o.redraw()
 
     def _get_features(self, llds):
-        flux = llds[self.enabled_features[smile_flux]]
-        centroid = llds[self.enabled_features[smile_centroid]]
-        rms = llds[self.enabled_features[smile_rms]]
-        entropy = llds[self.enabled_features[smile_entropy]]
-        flux_max = self.feature_maxima[self.enabled_features[smile_flux]]
-        energy_max = self.feature_maxima[self.enabled_features[smile_rms]]
-        energy_delta = llds[self.enabled_features[smile_delta_rms]]
-        spect_rolloff = llds[self.enabled_features[smile_rolloff]]
-        # hnr = llds[self.enabled_features[smile_hnr]]
-        spect_harm = llds[self.enabled_features[smile_harmonicity]]
+        flux = llds[self.enabled_features[HLD.flux]]
+        centroid = llds[self.enabled_features[HLD.centroid]]
+        rms = llds[self.enabled_features[HLD.rms]]
+        entropy = llds[self.enabled_features[HLD.entropy]]
+        flux_max = self.feature_maxima[self.enabled_features[HLD.flux]]
+        energy_max = self.feature_maxima[self.enabled_features[HLD.rms]]
+        energy_delta = llds[self.enabled_features[HLD.delta_rms]]
+        spect_rolloff = llds[self.enabled_features[HLD.rolloff]]
+        # hnr = llds[self.enabled_features[HLD.smile_hnr]]
+        spect_harm = llds[self.enabled_features[HLD.harmonicity]]
 
         return flux, centroid, rms, entropy, flux_max, energy_max, energy_delta, spect_rolloff, spect_harm
 
     def _get_mfccs(self, llds):
-        mfccs = [llds[self.enabled_features[mf]] for mf in smile_mfccs]
+        mfccs = [llds[self.enabled_features[mf]] for mf in HLD.mfccs]
         return mfccs
 
     def _get_rastas(self, llds):
-        rastas = [llds[self.enabled_features[ra]] for ra in smile_rastas]
+        rastas = [llds[self.enabled_features[ra]] for ra in HLD.rastas]
         return rastas
 
     def _draw_all(self, hex_array):
