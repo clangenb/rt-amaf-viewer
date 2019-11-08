@@ -1,4 +1,4 @@
-class HLD:
+class HLDs:
     entropy = 'pcm_fftMag_spectralEntropy_sma'
     centroid = 'pcm_fftMag_spectralCentroid_sma'
     flux = 'pcm_fftMag_spectralFlux_sma'
@@ -11,3 +11,47 @@ class HLD:
     mfccs = ['mfcc_sma[{}]'.format(i) for i in range(1, 14)]
     rastas = ['audSpec_Rfilt_sma[{}]'.format(i) for i in range(26)]
 
+    @staticmethod
+    def as_list():
+        return [HLDs.entropy, HLDs.centroid, HLDs.flux, HLDs.hnr, HLDs.harmonicity, HLDs.rms,
+                HLDs.delta_rms, HLDs.band250_650, HLDs.rolloff]
+
+
+    @staticmethod
+    def get_enables_features_from_config(config, feature_list):
+        enabled_features = {}
+        for key in config['features']:
+            if int(config['features'][key]) == 1 and key in feature_list:
+                enabled_features[key] = feature_list.index(key)
+
+        return enabled_features
+
+
+class EnabledFeatures:
+    def __init__(self, config, feature_list):
+        self.enabled_features = HLDs.get_enables_features_from_config(config, feature_list)
+
+
+    def get_features(self, feature_maxima, llds):
+        flux = llds[self.enabled_features[HLDs.flux]]
+        centroid = llds[self.enabled_features[HLDs.centroid]]
+        rms = llds[self.enabled_features[HLDs.rms]]
+        entropy = llds[self.enabled_features[HLDs.entropy]]
+        flux_max = feature_maxima[self.enabled_features[HLDs.flux]]
+        energy_max = feature_maxima[self.enabled_features[HLDs.rms]]
+        energy_delta = llds[self.enabled_features[HLDs.delta_rms]]
+        spect_rolloff = llds[self.enabled_features[HLDs.rolloff]]
+        # hnr = llds[self.enabled_features[HLD.smile_hnr]]
+        spect_harm = llds[self.enabled_features[HLDs.harmonicity]]
+
+        return flux, centroid, rms, entropy, flux_max, energy_max, energy_delta, spect_rolloff, spect_harm
+
+
+    def get_mfccs(self, llds):
+        mfccs = [llds[self.enabled_features[mf]] for mf in HLDs.mfccs]
+        return mfccs
+
+
+    def get_rastas(self, llds):
+        rastas = [llds[self.enabled_features[ra]] for ra in HLDs.rastas]
+        return rastas

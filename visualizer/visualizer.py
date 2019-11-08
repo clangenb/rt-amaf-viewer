@@ -8,7 +8,7 @@ from visualizer.patterns.disc_object import Disc
 from visualizer.patterns.flux_magnituder import FluxMagnituder
 from visualizer.patterns.rectangle_object import Rectangle
 from visualizer.patterns.spectrum import CoefficientShower
-from visualizer.smile_features import HLD
+from visualizer.smile_features import HLDs, EnabledFeatures
 
 black = 0x000000
 blue = cbf.to_hex_color(cbf.get_emotion_color_by_angle(220))
@@ -28,7 +28,6 @@ class Visualizer:
 
         self.curr_color = cbf.get_emotion_color_by_angle(60)
         self.hex_array = cbf.to_hex_array(cbf.gaussian_color_matrix(self.curr_color, std=std, size=self.matrix_size))
-        self.enabled_features = {}
 
         self.timer = TimeQuantizer()
 
@@ -40,7 +39,7 @@ class Visualizer:
         self.strip = tcp_strip(tcp_protocol)
 
         self.magnituder = FluxMagnituder(self.strip)
-        self.rasta_shower = CoefficientShower(self.strip, len(HLD.rastas))
+        self.rasta_shower = CoefficientShower(self.strip, len(HLDs.rastas))
         # rec1 = Rectangle(visualizer=self, coordinate=(4, 4), size=(4, 4), led_strip=self.strip)
         # rec2 = Rectangle(visualizer=self, coordinate=(9, 4), size=(2, 2), led_strip=self.strip, color=yellow)
         # rec3 = Rectangle(visualizer=self, coordinate=(14, 4), size=(2, 2), led_strip=self.strip, color=yellow)
@@ -53,9 +52,7 @@ class Visualizer:
         # self.objects = [rec1, rec2, rec3, rec4, rec5, rec6]
         self.objects = [rec6]
 
-        for key in config['features']:
-            if int(config['features'][key]) == 1 and key in feature_list:
-                self.enabled_features[key] = feature_list.index(key)
+        self.enabled_features = EnabledFeatures(config, feature_list)
 
         # for mf in HLD.smile_mfccs:
         #     if mf in feature_list:
@@ -75,9 +72,9 @@ class Visualizer:
         self.feature_maxima = self.feature_maxima * 0.999
         # rastas = self._get_rastas(llds)
 
-        if HLD.flux in self.enabled_features:
+        if HLDs.flux in self.enabled_features:
             flux, centroid, rms, entropy, flux_max, energy_max, \
-            energy_delta, spec_rolloff, hnr = self._get_features(llds)
+            energy_delta, spec_rolloff, hnr = self.enabled_features.get_features(self.feature_maxima, llds)
 
             # self.rasta_shower.show(rastas)
             self.update_palette(centroid, rms, hnr)
@@ -105,28 +102,6 @@ class Visualizer:
         self.timer.reset()
         for o in self.objects:
             o.redraw()
-
-    def _get_features(self, llds):
-        flux = llds[self.enabled_features[HLD.flux]]
-        centroid = llds[self.enabled_features[HLD.centroid]]
-        rms = llds[self.enabled_features[HLD.rms]]
-        entropy = llds[self.enabled_features[HLD.entropy]]
-        flux_max = self.feature_maxima[self.enabled_features[HLD.flux]]
-        energy_max = self.feature_maxima[self.enabled_features[HLD.rms]]
-        energy_delta = llds[self.enabled_features[HLD.delta_rms]]
-        spect_rolloff = llds[self.enabled_features[HLD.rolloff]]
-        # hnr = llds[self.enabled_features[HLD.smile_hnr]]
-        spect_harm = llds[self.enabled_features[HLD.harmonicity]]
-
-        return flux, centroid, rms, entropy, flux_max, energy_max, energy_delta, spect_rolloff, spect_harm
-
-    def _get_mfccs(self, llds):
-        mfccs = [llds[self.enabled_features[mf]] for mf in HLD.mfccs]
-        return mfccs
-
-    def _get_rastas(self, llds):
-        rastas = [llds[self.enabled_features[ra]] for ra in HLD.rastas]
-        return rastas
 
     def _draw_all(self, hex_array):
         i = 0
