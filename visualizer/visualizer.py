@@ -4,6 +4,7 @@ import numpy as np
 import visualizer.color.utils as cbf
 from utility.time_quantizer import TimeQuantizer
 from visualizer.backgrounds.background import Backgrounder
+from visualizer.matrix.led_strips import TcpStrip
 from visualizer.patterns.disc_object import Disc
 from visualizer.patterns.flux_magnituder import FluxMagnituder
 from visualizer.patterns.rectangle_object import Rectangle
@@ -36,7 +37,7 @@ class Visualizer:
         config.read(config_file)
 
         self.numpixels = 300
-        self.strip = tcp_strip(tcp_protocol)
+        self.strip = TcpStrip(tcp_protocol)
 
         self.magnituder = FluxMagnituder(self.strip)
         self.rasta_shower = CoefficientShower(self.strip, len(HLDs.rastas))
@@ -160,17 +161,3 @@ class Visualizer:
                             self.strip.setPixelColor(i, o.color)
             i += 1
         self.strip.show()
-
-
-
-class tcp_strip:
-    def __init__(self, protocol):
-        self._proto = protocol
-
-    def show(self):
-        self._proto.sendLine("show".encode("ascii"))
-
-    def setPixelColor(self, i, color):
-        # print("Pixel no{}, Pixel Color {}".format(i, color))
-        self._proto.sendLine("{},{}".format(i, color).encode("ascii"))
-
