@@ -1,6 +1,6 @@
 import numpy as np
 
-import visualizer.color.color_base_functions as cb
+import visualizer.color.utils as cb
 
 black = 0x000000
 blue = cb.to_hex_color(cb.get_emotion_color_by_angle(220))

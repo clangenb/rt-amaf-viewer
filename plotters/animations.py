@@ -10,7 +10,7 @@ from matplotlib.lines import Line2D
 
 import abc
 
-import visualizer.color.color_base_functions as cbf
+import visualizer.color.utils as cbf
 from plotters.list_containers import PredictionListContainer
 
 

@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib.colors import rgb_to_hsv, hsv_to_rgb
 
-import visualizer.color.color_base_functions as cbf
+import visualizer.color.utils as cbf
 from visualizer.backgrounds.curtain import Curtain
 
 black = 0x000000

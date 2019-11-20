@@ -1,8 +1,8 @@
 import configparser
 
 import numpy as np
-import visualizer.color.color_base_functions as cb
-import visualizer.color.color_base_functions as cbf
+import visualizer.color.utils as cb
+import visualizer.color.utils as cbf
 from utility.time_quantizer import TimeQuantizer
 from visualizer.backgrounds.background import Backgrounder
 from visualizer.patterns.flux_magnituder import FluxMagnituder

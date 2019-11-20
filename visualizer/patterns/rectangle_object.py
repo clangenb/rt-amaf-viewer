@@ -2,7 +2,7 @@ import numpy as np
 import time
 
 import visualizer.pixel_funcs as pf
-import visualizer.color.color_base_functions as cb
+import visualizer.color.utils as cb
 from visualizer.patterns.base_object import BaseObject
 
 red = cb.to_hex_color(cb.get_emotion_color_by_angle(120))

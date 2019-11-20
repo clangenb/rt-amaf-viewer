@@ -1,4 +1,4 @@
-import visualizer.color.color_base_functions as cb
+import visualizer.color.utils as cb
 from dotstar import Adafruit_DotStar
 
 black = 0x000000

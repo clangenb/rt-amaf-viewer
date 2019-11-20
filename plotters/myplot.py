@@ -5,7 +5,7 @@ from matplotlib.colors import rgb_to_hsv, hsv_to_rgb
 from matplotlib.figure import figaspect
 import numpy as np
 
-import visualizer.color.color_base_functions as cbf
+import visualizer.color.utils as cbf
 
 
 SAVE_PATH = '../figures/'
