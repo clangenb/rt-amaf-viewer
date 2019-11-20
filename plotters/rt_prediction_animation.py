@@ -4,7 +4,7 @@ import numpy as np
 from data.dataset import Dataset
 import data.datahelpers as dh
 from tf.testmodel import TestModel
-from visualizer.color_base_functions import renormalize_angle
+from visualizer.color.color_base_functions import renormalize_angle
 
 path_to_csv = '../data/ComParE_2016_reduced_fsize300_fstep100/'
 good_songs = [44, 49, 12, 112, 88, 39, 172, 143, 143, 142, 300, 665, 724]

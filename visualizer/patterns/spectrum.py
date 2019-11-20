@@ -1,6 +1,6 @@
 import numpy as np
 
-import visualizer.color_base_functions as cb
+import visualizer.color.color_base_functions as cb
 import visualizer.pixel_funcs as pxf
 
 black = 0x000000

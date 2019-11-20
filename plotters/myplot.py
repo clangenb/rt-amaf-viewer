@@ -3,11 +3,9 @@ from __future__ import division
 import matplotlib.pyplot as plt
 from matplotlib.colors import rgb_to_hsv, hsv_to_rgb
 from matplotlib.figure import figaspect
-import matplotlib.ticker as tck
-from matplotlib.lines import Line2D
 import numpy as np
 
-import visualizer.color_base_functions as cbf
+import visualizer.color.color_base_functions as cbf
 
 
 SAVE_PATH = '../figures/'

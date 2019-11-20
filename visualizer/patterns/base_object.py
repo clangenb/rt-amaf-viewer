@@ -6,7 +6,7 @@ from queue import Queue
 
 import abc
 
-import visualizer.color_base_functions as cb
+import visualizer.color.color_base_functions as cb
 
 red = cb.to_hex_color(cb.get_emotion_color_by_angle(120))
 green = cb.to_hex_color(cb.get_emotion_color_by_angle(0))
