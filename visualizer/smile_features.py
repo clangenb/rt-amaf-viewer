@@ -16,7 +16,6 @@ class HLDs:
         return [HLDs.entropy, HLDs.centroid, HLDs.flux, HLDs.hnr, HLDs.harmonicity, HLDs.rms,
                 HLDs.delta_rms, HLDs.band250_650, HLDs.rolloff]
 
-
     @staticmethod
     def get_enables_features_from_config(config, feature_list):
         enabled_features = {}
@@ -29,29 +28,29 @@ class HLDs:
 
 class EnabledFeatures:
     def __init__(self, config, feature_list):
-        self.enabled_features = HLDs.get_enables_features_from_config(config, feature_list)
+        self._enabled_features = HLDs.get_enables_features_from_config(config, feature_list)
 
+    def list(self):
+        return self._enabled_features
 
     def get_features(self, feature_maxima, llds):
-        flux = llds[self.enabled_features[HLDs.flux]]
-        centroid = llds[self.enabled_features[HLDs.centroid]]
-        rms = llds[self.enabled_features[HLDs.rms]]
-        entropy = llds[self.enabled_features[HLDs.entropy]]
-        flux_max = feature_maxima[self.enabled_features[HLDs.flux]]
-        energy_max = feature_maxima[self.enabled_features[HLDs.rms]]
-        energy_delta = llds[self.enabled_features[HLDs.delta_rms]]
-        spect_rolloff = llds[self.enabled_features[HLDs.rolloff]]
+        flux = llds[self._enabled_features[HLDs.flux]]
+        centroid = llds[self._enabled_features[HLDs.centroid]]
+        rms = llds[self._enabled_features[HLDs.rms]]
+        entropy = llds[self._enabled_features[HLDs.entropy]]
+        flux_max = feature_maxima[self._enabled_features[HLDs.flux]]
+        energy_max = feature_maxima[self._enabled_features[HLDs.rms]]
+        energy_delta = llds[self._enabled_features[HLDs.delta_rms]]
+        spect_rolloff = llds[self._enabled_features[HLDs.rolloff]]
         # hnr = llds[self.enabled_features[HLD.smile_hnr]]
-        spect_harm = llds[self.enabled_features[HLDs.harmonicity]]
+        spect_harm = llds[self._enabled_features[HLDs.harmonicity]]
 
         return flux, centroid, rms, entropy, flux_max, energy_max, energy_delta, spect_rolloff, spect_harm
 
-
     def get_mfccs(self, llds):
-        mfccs = [llds[self.enabled_features[mf]] for mf in HLDs.mfccs]
+        mfccs = [llds[self._enabled_features[mf]] for mf in HLDs.mfccs]
         return mfccs
 
-
     def get_rastas(self, llds):
-        rastas = [llds[self.enabled_features[ra]] for ra in HLDs.rastas]
+        rastas = [llds[self._enabled_features[ra]] for ra in HLDs.rastas]
         return rastas

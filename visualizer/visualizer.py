@@ -73,9 +73,9 @@ class Visualizer:
         self.feature_maxima = self.feature_maxima * 0.999
         # rastas = self._get_rastas(llds)
 
-        if HLDs.flux in self.enabled_features:
+        if HLDs.flux in self.enabled_features.list():
             flux, centroid, rms, entropy, flux_max, energy_max, \
-            energy_delta, spec_rolloff, hnr = self.enabled_features.get_features(self.feature_maxima, llds)
+                energy_delta, spec_rolloff, hnr = self.enabled_features.get_features(self.feature_maxima, llds)
 
             # self.rasta_shower.show(rastas)
             self.update_palette(centroid, rms, hnr)
