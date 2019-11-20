@@ -3,7 +3,7 @@ from __future__ import print_function
 import sys
 from twisted.python import log
 from twisted.internet import reactor
-from tcp.tcp_client.client_factory import LedReceiverFactory
+from tcp.client.factory import LedReceiverFactory
 
 
 def main():

@@ -2,7 +2,7 @@ from twisted.python import log
 from twisted.internet.protocol import connectionDone
 from twisted.protocols.basic import LineReceiver
 
-from tcp.tcp_server.producer import Producer
+from tcp.server.producer import Producer
 
 class ServeProducerProtocol(LineReceiver):
     def connectionMade(self):

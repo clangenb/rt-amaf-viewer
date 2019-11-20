@@ -1,7 +1,7 @@
 from twisted.python import log
 from twisted.internet.protocol import ClientFactory
 
-from tcp.tcp_client.client_protocol import LedReceiverProtocol
+from tcp.client.protocol import LedReceiverProtocol
 
 class LedReceiverFactory(ClientFactory):
     def startedConnecting(self, connector):

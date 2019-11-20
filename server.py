@@ -1,6 +1,6 @@
 import subprocess
 
-from tcp.tcp_server.server_factory import ProducerFactory
+from tcp.server.factory import ProducerFactory
 
 import sys
 from twisted.python import log
