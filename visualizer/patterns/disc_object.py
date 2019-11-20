@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-import visualizer.pixel_funcs as pf
+import visualizer.matrix.pixel_funcs as pf
 import visualizer.color.utils as cb
 from visualizer.patterns.base_object import BaseObject
 

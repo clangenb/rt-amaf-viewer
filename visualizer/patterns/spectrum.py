@@ -1,7 +1,7 @@
 import numpy as np
 
 import visualizer.color.utils as cb
-import visualizer.pixel_funcs as pxf
+import visualizer.matrix.pixel_funcs as pxf
 
 black = 0x000000
 blue = cb.to_hex_color(cb.get_emotion_color_by_angle(220))
