@@ -21,6 +21,6 @@ class LazyTcpStrip:
     def show(self):
         leds_to_update = ""
         for i, color in self._updated_pixels.items():
-            leds_to_update += "{},{}".format(i, color).encode("ascii")
+            leds_to_update += "{},{} ".format(i, color)
 
-        self._proto.sendLine(leds_to_update)
+        self._proto.sendLine(leds_to_update.encode("ascii"))
