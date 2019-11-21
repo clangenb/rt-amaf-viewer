@@ -1,13 +1,12 @@
-from dotstar import Adafruit_DotStar
-
 from twisted.python import log
 from twisted.internet.protocol import connectionDone
 
 from twisted.protocols.basic import LineReceiver
 
+
 class LedReceiverProtocol(LineReceiver):
-    def __init__(self):
-        self.strip = led_strip(300)
+    def __init__(self, led_strip):
+        self.strip = led_strip
         super().__init__()
 
     def connectionMade(self):
@@ -15,19 +14,17 @@ class LedReceiverProtocol(LineReceiver):
         self.sendLine(b'How many random integers do you want?')
 
     def lineReceived(self, line):
-        num_col = line.decode("ascii").strip(",").split(",")
-        if len(num_col) > 1:
-            # log.msg('Set Pixel no {} to Color {}'.format(int(num_col[0]), int(num_col[1])))
-            self.strip.setPixelColor(int(num_col[0]), int(num_col[1]))
-        else:
-            self.strip.show()
+        # pixel_tuples should be ["i, color"]
+        line_dec = line.decode("ascii")
+        if line_dec[0] == "#":
+            pixel_tuples = line.decode("ascii").strip("#").split("#")
+            # print("Pixel tuples", pixel_tuples)
+            for pixel_tuple in pixel_tuples:
+                pixel, color = pixel_tuple.split(",")
+                # print('Set Pixel no {} to Color {}'.format(int(pixel), int(color)))
+                self.strip.setPixelColor(int(pixel), int(color))
 
+            self.strip.show()
 
     def connectionLost(self, reason=connectionDone):
         print('Connection lost from {}'.format(self.transport.getPeer()))
-
-
-def led_strip(numpixels):
-    strip = Adafruit_DotStar(numpixels)
-    strip.begin()
-    return strip

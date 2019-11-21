@@ -1,13 +1,12 @@
 import unittest
 from unittest.mock import Mock
 
-from visualizer.matrix.led_strips import LazyTcpStrip
+from visualizer.matrix.leds.tcp_strips import LazyTcpStrip
 
 
 class LazyLedStripShould(unittest.TestCase):
 
-    @staticmethod
-    def test_should_send_3_updated_pixels():
+    def test_should_send_3_updated_pixels(self):
         protocol = Mock()
         protocol.sendLine()
         strip = LazyTcpStrip(protocol)
@@ -18,7 +17,7 @@ class LazyLedStripShould(unittest.TestCase):
 
         strip.show()
 
-        protocol.sendLine.assert_called_with("1,1 2,2 3,3 ".encode("ascii"))
+        protocol.sendLine.assert_called_with("#1,1#2,2#3,3#".encode("ascii"))
 
 
 if __name__ == '__main__':

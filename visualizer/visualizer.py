@@ -4,7 +4,6 @@ import numpy as np
 import visualizer.color.utils as cbf
 from utility.time_quantizer import TimeQuantizer
 from visualizer.backgrounds.background import Backgrounder
-from visualizer.matrix.led_strips import TcpStrip
 from visualizer.patterns.disc_object import Disc
 from visualizer.patterns.flux_magnituder import FluxMagnituder
 from visualizer.patterns.rectangle_object import Rectangle
@@ -21,7 +20,7 @@ visualizer_types = []
 
 
 class Visualizer:
-    def __init__(self, feature_list, std, tcp_protocol, type='rasta_shower'):
+    def __init__(self, feature_list, std, led_strip, type='rasta_shower'):
         self.matrix_size = (15, 20)
         self.backgrounder = Backgrounder(std, self.matrix_size)
         self.curr_off_pixels = []
@@ -37,7 +36,7 @@ class Visualizer:
         config.read(config_file)
 
         self.numpixels = 300
-        self.strip = TcpStrip(tcp_protocol)
+        self.strip = led_strip
 
         self.magnituder = FluxMagnituder(self.strip)
         self.rasta_shower = CoefficientShower(self.strip, len(HLDs.rastas))
