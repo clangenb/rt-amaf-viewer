@@ -15,6 +15,7 @@ yellow = cbf.to_hex_color(cbf.get_emotion_color_by_angle(60))
 
 config_file = "visualizer_conf.ini"
 
+
 class VisualizerTypes:
     Normal = "Normal"
     Rasta = "rasta"
@@ -68,7 +69,7 @@ class Visualizer:
             energy_delta, spec_rolloff, hnr = self.enabled_features.get_features(self.feature_maxima, llds)
 
         self.update_palette(centroid, rms, hnr)
-        if (flux > flux_max / 3) and (energy_delta > 0.007):
+        if should_trigger_movement(flux, flux_max, energy_delta):
             for rec in self.objects:
                 rec.random_move(flux, flux_max, flush=True)
 
@@ -91,8 +92,9 @@ class Visualizer:
             o.update_color(self.curr_color)
 
     def update_palette(self, centroid, rms, entropy):
-        self.hex_array, off_pixels = self.backgrounder.modulate_color(self.curr_color, centroid, rms, entropy)
-        self.draw_whole_background(off_pixels)
+        self.hex_array, self.curr_off_pixels = self.backgrounder.modulate_color(self.curr_color, centroid, rms, entropy)
+        self.curr_object_pixels = self.get_object_pixels()
+        self.draw_whole_background(self.curr_object_pixels, self.curr_off_pixels)
         self.timer.reset()
         for o in self.objects:
             o.redraw()
@@ -105,25 +107,21 @@ class Visualizer:
 
         self.strip.show()
 
-    def draw_whole_background(self, off_pixels=None):
+    def draw_whole_background(self, object_pixels, off_pixels):
+        if off_pixels is not None:
+            self.set_off_pixels_black(object_pixels, off_pixels)
         non_background_pixels = []
+        non_background_pixels += object_pixels
+        non_background_pixels += off_pixels
+        self.draw_background(non_background_pixels)
+
+    def get_object_pixels(self):
         object_pixels = []
         for o in self.objects:
             object_pixels += o.get_object_pixels()
-        if off_pixels is not None:
-            for i in off_pixels:
-                if i not in object_pixels:
-                    self.strip.setPixelColor(i, black)
-                # else:
-                #     for o in self.objects:
-                #         if i in o.get_object_pixels():
-                #             self.strip.setPixelColor(i, o.color)
+        return object_pixels
 
-            non_background_pixels += off_pixels
-            non_background_pixels += object_pixels
-            self.curr_off_pixels = off_pixels
-            self.curr_object_pixels = object_pixels
-
+    def draw_background(self, non_background_pixels):
         i = 0
         if len(non_background_pixels) > 150:
             background_pixels = set(range(300)).difference(set(non_background_pixels))
@@ -137,11 +135,13 @@ class Visualizer:
                     self.strip.setPixelColor(i, color)
                 i += 1
 
+    def set_off_pixels_black(self, object_pixels, off_pixels):
+        for i in off_pixels:
+            if i not in object_pixels:
+                self.strip.setPixelColor(i, black)
+
     def draw_pixels(self, pixels):
         i = 0
-        object_pixels = []
-        for o in self.objects:
-            object_pixels += o.get_object_pixels()
         for color in self.hex_array:
             if i in pixels:
                 if i in self.curr_off_pixels:
@@ -154,3 +154,7 @@ class Visualizer:
                             self.strip.setPixelColor(i, o.color)
             i += 1
         self.strip.show()
+
+
+def should_trigger_movement(flux, flux_max, energy_delta):
+    return (flux > flux_max / 3) and (energy_delta > 0.007)
