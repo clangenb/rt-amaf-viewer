@@ -4,7 +4,6 @@ import numpy as np
 import visualizer.color.utils as cbf
 from utility.time_quantizer import TimeQuantizer
 from visualizer.backgrounds.background import Backgrounder
-from visualizer.patterns.disc_object import Disc
 from visualizer.patterns.flux_magnituder import FluxMagnituder
 from visualizer.patterns.rectangle_object import Rectangle
 from visualizer.patterns.spectrum import CoefficientShower
@@ -16,15 +15,19 @@ yellow = cbf.to_hex_color(cbf.get_emotion_color_by_angle(60))
 
 config_file = "visualizer_conf.ini"
 
-visualizer_types = []
+class VisualizerTypes:
+    Normal = "Normal"
+    Rasta = "rasta"
+    Magnituder = "magnituderr"
 
 
 class Visualizer:
-    def __init__(self, feature_list, std, led_strip, type='rasta_shower'):
+    def __init__(self, feature_list, std, led_strip, vis_type='rasta_shower'):
         self.matrix_size = (15, 20)
         self.backgrounder = Backgrounder(std, self.matrix_size)
         self.curr_off_pixels = []
         self.curr_object_pixels = []
+        self.type = vis_type
 
         self.curr_color = cbf.get_emotion_color_by_angle(60)
         self.hex_array = cbf.to_hex_array(cbf.gaussian_color_matrix(self.curr_color, std=std, size=self.matrix_size))
@@ -37,57 +40,48 @@ class Visualizer:
 
         self.numpixels = 300
         self.strip = led_strip
-
-        self.magnituder = FluxMagnituder(self.strip)
-        self.rasta_shower = CoefficientShower(self.strip, len(HLDs.rastas))
-        # rec1 = Rectangle(visualizer=self, coordinate=(4, 4), size=(4, 4), led_strip=self.strip)
-        # rec2 = Rectangle(visualizer=self, coordinate=(9, 4), size=(2, 2), led_strip=self.strip, color=yellow)
-        # rec3 = Rectangle(visualizer=self, coordinate=(14, 4), size=(2, 2), led_strip=self.strip, color=yellow)
-        # rec4 = Rectangle(visualizer=self, coordinate=(4, 9), size=(2, 2), led_strip=self.strip, color=yellow)
-        # rec5 = Rectangle(visualizer=self, coordinate=(3, 9), size=(2, 2), led_strip=self.strip, color=yellow)
-        # rec6 = Rectangle(visualizer=self, coordinate=(14, 9), size=(2, 2), led_strip=self.strip, color=yellow)
         rec6 = Rectangle(visualizer=self, coordinate=(10, 6), size=(3, 3), led_strip=self.strip, color=yellow)
 
-        circle = Disc(visualizer=self, coordinate=(10, 8), radius=1.5, led_strip=self.strip)
-        # self.objects = [rec1, rec2, rec3, rec4, rec5, rec6]
         self.objects = [rec6]
 
         self.enabled_features = EnabledFeatures(config, feature_list)
+        print('Enabled Features: ', self.enabled_features.list())
 
-        # for mf in HLD.smile_mfccs:
-        #     if mf in feature_list:
-        #         self.enabled_features[mf] = feature_list.index(mf)
-
-        # for ra in HLD.smile_rastas:
-        #     if ra in feature_list:
-        #         self.enabled_features[ra] = feature_list.index(ra)
-
-        print('Enabled Features: ', self.enabled_features)
         self.feature_maxima = np.zeros(len(feature_list))
+
+        if self.type == VisualizerTypes.Rasta:
+            self.rasta_shower = CoefficientShower(self.strip, len(HLDs.rastas))
+
+        if self.type == VisualizerTypes.Magnituder:
+            self.magnituder = FluxMagnituder(self.strip)
 
     def update_visuals(self, llds):
         self.timer.reset()
 
         self.feature_maxima = np.maximum(self.feature_maxima, llds)
         self.feature_maxima = self.feature_maxima * 0.999
-        # rastas = self._get_rastas(llds)
 
-        if HLDs.flux in self.enabled_features.list():
-            flux, centroid, rms, entropy, flux_max, energy_max, \
-                energy_delta, spec_rolloff, hnr = self.enabled_features.get_features(self.feature_maxima, llds)
+        if self.type == VisualizerTypes.Rasta:
+            self.update_rastas(llds)
 
-            # self.rasta_shower.show(rastas)
-            self.update_palette(centroid, rms, hnr)
-            # for o in self.objects:
-            #     o.redraw()
-            if (flux > flux_max / 3) and (energy_delta > 0.007):
-                # self.circle.bounce_around(flux, flux_max)
-                for rec in self.objects:
-                    rec.random_move(flux, flux_max, flush=True)
-            #
-            # # self.magnituder.show(self.hex_array, flux, flux_max)
-            # print('updating visuals time: ', self.timer.measure_total())
+        flux, centroid, rms, entropy, flux_max, energy_max, \
+            energy_delta, spec_rolloff, hnr = self.enabled_features.get_features(self.feature_maxima, llds)
 
+        self.update_palette(centroid, rms, hnr)
+        if (flux > flux_max / 3) and (energy_delta > 0.007):
+            for rec in self.objects:
+                rec.random_move(flux, flux_max, flush=True)
+
+        if self.type == VisualizerTypes.Magnituder:
+            self.magnituder.show(self.hex_array, flux, flux_max)
+
+        # print('updating visuals time: ', self.timer.measure_total())
+
+        self.strip.show()
+
+    def update_rastas(self, llds):
+        rastas = self.enabled_features.get_mfccs(llds)
+        self.rasta_shower.show(rastas)
         self.strip.show()
 
     def update_base_color(self, arousal, valence):
