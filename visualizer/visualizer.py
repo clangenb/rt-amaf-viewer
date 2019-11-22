@@ -19,11 +19,11 @@ config_file = "visualizer_conf.ini"
 class VisualizerTypes:
     Normal = "Normal"
     Rasta = "rasta"
-    Magnituder = "magnituderr"
+    Magnituder = "magnituder"
 
 
 class Visualizer:
-    def __init__(self, feature_list, std, led_strip, vis_type='rasta_shower'):
+    def __init__(self, feature_list, std, led_strip, vis_type=VisualizerTypes.Rasta):
         self.matrix_size = (15, 20)
         self.backgrounder = Backgrounder(std, self.matrix_size)
         self.curr_off_pixels = []
@@ -43,7 +43,7 @@ class Visualizer:
         self.strip = led_strip
         rec6 = Rectangle(visualizer=self, coordinate=(10, 6), size=(3, 3), led_strip=self.strip, color=yellow)
 
-        self.objects = [rec6]
+        # self.objects = [rec6]
 
         self.enabled_features = EnabledFeatures(config, feature_list)
         print('Enabled Features: ', self.enabled_features.list())
@@ -52,6 +52,7 @@ class Visualizer:
 
         if self.type == VisualizerTypes.Rasta:
             self.rasta_shower = CoefficientShower(self.strip, len(HLDs.rastas))
+            self.objects = [self.rasta_shower]
 
         if self.type == VisualizerTypes.Magnituder:
             self.magnituder = FluxMagnituder(self.strip)
@@ -69,21 +70,20 @@ class Visualizer:
             energy_delta, spec_rolloff, hnr = self.enabled_features.get_features(self.feature_maxima, llds)
 
         self.update_palette(centroid, rms, hnr)
-        if should_trigger_movement(flux, flux_max, energy_delta):
-            for rec in self.objects:
-                rec.random_move(flux, flux_max, flush=True)
-
-        if self.type == VisualizerTypes.Magnituder:
-            self.magnituder.show(self.hex_array, flux, flux_max)
-
-        # print('updating visuals time: ', self.timer.measure_total())
-
+        # if should_trigger_movement(flux, flux_max, energy_delta):
+        #     for rec in self.objects:
+        #         rec.random_move(flux, flux_max, flush=True)
+        #
+        # if self.type == VisualizerTypes.Magnituder:
+        #     self.magnituder.show(self.hex_array, flux, flux_max)
+        #
+        # # print('updating visuals time: ', self.timer.measure_total())
+        #
         self.strip.show()
 
     def update_rastas(self, llds):
-        rastas = self.enabled_features.get_mfccs(llds)
+        rastas = self.enabled_features.get_rastas(llds)
         self.rasta_shower.show(rastas)
-        self.strip.show()
 
     def update_base_color(self, arousal, valence):
         self.curr_color = cbf.get_emotion_color(arousal, valence)

@@ -39,20 +39,14 @@ class CoefficientShower:
     def get_object_pixels(self):
         return self.on_pixels
 
-    def update_color(self, arousal=None, valence=None):
-        if(arousal is None) and (valence is None):
-            # for testing without emotion prediction
-            angle = np.random.rand() * 360
-        else:
-            angle = cb. get_emotion_angle(arousal, valence)
-            angle = (angle + 180) % 360
-        if 30 <= angle <= 150:
-            # in more energetic environment we have more std to express dynamics
-            std = 0.6
-        else:
-            std = 0.3
-        c = cb.get_emotion_color_by_angle(angle) + np.random.normal((0, 0, 0), scale=std)
+    def update_color(self, color):
+        c = cb.get_complementary_color(color)
         self.color = cb.to_hex_color(c)
+        self.redraw()
+
+    def redraw(self):
+        for px in self.on_pixels:
+            self.strip.setPixelColor(px, self.color)
 
 
 def get_on_rows(matrix_size, feature, maxima):
