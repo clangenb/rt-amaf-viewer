@@ -25,10 +25,28 @@ class HLDs:
 
         return enabled_features
 
+    @staticmethod
+    def get_rastas_from_feature_list(feature_list):
+        rastas = {}
+        for ra in HLDs.rastas:
+            rastas[ra] = feature_list.index(ra)
+
+        return rastas
+
+    @staticmethod
+    def get_mfccs_from_feature_list(feature_list):
+        mfccs = {}
+        for c in HLDs.mfccs:
+            mfccs[c] = feature_list.index(c)
+
+        return mfccs
+
 
 class EnabledFeatures:
     def __init__(self, config, feature_list):
         self._enabled_features = HLDs.get_enables_features_from_config(config, feature_list)
+        self._rastas = HLDs.get_rastas_from_feature_list(feature_list)
+        self._mfccs = HLDs.get_mfccs_from_feature_list(feature_list)
 
     def list(self):
         return self._enabled_features
@@ -48,9 +66,9 @@ class EnabledFeatures:
         return flux, centroid, rms, entropy, flux_max, energy_max, energy_delta, spect_rolloff, spect_harm
 
     def get_mfccs(self, llds):
-        mfccs = [llds[self._enabled_features[mf]] for mf in HLDs.mfccs]
+        mfccs = [llds[self._mfccs[mf]] for mf in HLDs.mfccs]
         return mfccs
 
     def get_rastas(self, llds):
-        rastas = [llds[self._enabled_features[ra]] for ra in HLDs.rastas]
+        rastas = [llds[self._rastas[ra]] for ra in HLDs.rastas]
         return rastas
