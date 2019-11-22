@@ -8,6 +8,7 @@ import numpy as np
 from utility.non_blocking_stream_reader import NonBlockingStreamReader as StreamReader
 import utility.live_helpers as lh
 from tf.predictor import Predictor
+from utility.time_quantizer import TimeQuantizer
 from visualizer.matrix.leds.tcp_strips import LazyTcpStrip, TcpStrip
 from visualizer.visualizer import Visualizer
 
@@ -46,24 +47,33 @@ class Producer(object):
 
             self._p.start_predicting(self.funcs, self.arousal, self.valence)
 
-        update_base_color_counter = 0
+        timer = TimeQuantizer()
         while not self._paused:
             if not self.llds.empty():
                 # print('LLds queue size', llds.qsize())
-                if self.llds.qsize() > 5:
-                    for _ in range(4):
-                        self.llds.get()
+                self.reduce_queue_size(self.llds)
 
                 self.visualizer.update_visuals(self.llds.get())
-            update_base_color_counter += 1
-            if not self.arousal.empty() and not self.valence.empty() and update_base_color_counter == 50:
-                update_base_color_counter = 0
-                a = np.float(self.arousal.get() / 1000)
-                v = np.float(self.valence.get() / 1000)
-                # print('Arousal: {}, Valence: {}'.format(a, v))
-                self.visualizer.update_base_color(a, v)
+
+            if not self.arousal.empty() and not self.valence.empty():
+                self.reduce_queue_size(self.arousal)
+                self.reduce_queue_size(self.valence)
+
+                if timer.measure_total() > 2:
+                    timer.reset()
+                    update_base_color_counter = 0
+                    a = np.float(self.arousal.get() / 1000)
+                    v = np.float(self.valence.get() / 1000)
+                    # print('Arousal: {}, Valence: {}'.format(a, v))
+                    self.visualizer.update_base_color(a, v)
             else:
                 time.sleep(0.005)
+
+    @staticmethod
+    def reduce_queue_size(queue):
+        if queue.qsize() > 5:
+            for _ in range(4):
+                queue.get()
 
     def pauseProducing(self):
         self._paused = True
