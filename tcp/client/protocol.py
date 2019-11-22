@@ -23,7 +23,7 @@ class LedReceiverProtocol(LineReceiver):
                 pixel, color = pixel_tuple.split(",")
                 # print('Set Pixel no {} to Color {}'.format(int(pixel), int(color)))
                 self.strip.setPixelColor(int(pixel), int(color))
-
+        else:
             self.strip.show()
 
     def connectionLost(self, reason=connectionDone):
