@@ -8,7 +8,7 @@ import numpy as np
 from utility.non_blocking_stream_reader import NonBlockingStreamReader as StreamReader
 import utility.live_helpers as lh
 from tf.predictor import Predictor
-from visualizer.matrix.leds.tcp_strips import LazyTcpStrip
+from visualizer.matrix.leds.tcp_strips import LazyTcpStrip, TcpStrip
 from visualizer.visualizer import Visualizer
 
 from twisted.python import log
@@ -41,11 +41,12 @@ class Producer(object):
             assert (len(lld_list) < len(func_list)), 'Funcs initialized before LLDS'
 
             StreamReader(self.smile_extract.stdout, self.llds, self.funcs, len(lld_list))
-            self.visualizer = Visualizer(lld_list, std=0.2, led_strip=LazyTcpStrip(self._proto))
+            self.visualizer = Visualizer(lld_list, std=0.2, led_strip=TcpStrip(self._proto))
             self.visualizer.update_base_color(np.random.rand(), np.random.rand())
 
             self._p.start_predicting(self.funcs, self.arousal, self.valence)
 
+        update_base_color_counter = 0
         while not self._paused:
             if not self.llds.empty():
                 # print('LLds queue size', llds.qsize())
@@ -54,8 +55,9 @@ class Producer(object):
                         self.llds.get()
 
                 self.visualizer.update_visuals(self.llds.get())
-
-            if not self.arousal.empty() and not self.valence.empty():
+            update_base_color_counter += 1
+            if not self.arousal.empty() and not self.valence.empty() and update_base_color_counter == 50:
+                update_base_color_counter = 0
                 a = np.float(self.arousal.get() / 1000)
                 v = np.float(self.valence.get() / 1000)
                 # print('Arousal: {}, Valence: {}'.format(a, v))
