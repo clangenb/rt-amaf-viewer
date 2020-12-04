@@ -17,7 +17,7 @@ config_file = "visualizer_conf.ini"
 
 
 class VisualizerTypes:
-    Normal = "Normal"
+    BouncingSquare = "Normal"
     Rasta = "rasta"
     Magnituder = "magnituder"
 
@@ -41,25 +41,23 @@ class Visualizer:
 
         self.numpixels = 300
         self.strip = led_strip
-        rec6 = Rectangle(visualizer=self, coordinate=(10, 6), size=(3, 3), led_strip=self.strip, color=yellow)
-
-        # self.objects = [rec6]
+        self.rec = Rectangle(visualizer=self, coordinate=(10, 6), size=(3, 3), led_strip=self.strip, color=yellow)
+        if self.type == VisualizerTypes.BouncingSquare:
+            self.objects = [self.rec]
 
         self.enabled_features = EnabledFeatures(config, feature_list)
         print('Enabled Features: ', self.enabled_features.list())
 
         self.feature_maxima = np.zeros(len(feature_list))
 
+        self.rasta_shower = CoefficientShower(self.strip, len(HLDs.rastas))
         if self.type == VisualizerTypes.Rasta:
-            self.rasta_shower = CoefficientShower(self.strip, len(HLDs.rastas))
             self.objects = [self.rasta_shower]
 
-        if self.type == VisualizerTypes.Magnituder:
-            self.magnituder = FluxMagnituder(self.strip)
+        # if self.type == VisualizerTypes.Magnituder:
+        self.magnituder = FluxMagnituder(self.strip)
 
     def update_visuals(self, llds):
-        self.timer.reset()
-
         self.feature_maxima = np.maximum(self.feature_maxima, llds)
         self.feature_maxima = self.feature_maxima * 0.999
 
@@ -70,12 +68,17 @@ class Visualizer:
             energy_delta, spec_rolloff, hnr = self.enabled_features.get_features(self.feature_maxima, llds)
 
         self.update_palette(centroid, rms, hnr)
-        # if should_trigger_movement(flux, flux_max, energy_delta):
-        #     for rec in self.objects:
-        #         rec.random_move(flux, flux_max, flush=True)
-        #
-        # if self.type == VisualizerTypes.Magnituder:
-        #     self.magnituder.show(self.hex_array, flux, flux_max)
+        if should_trigger_movement(flux, flux_max, energy_delta):
+            if self.timer.measure_total() > 60:
+                self.next_visualizer_type()
+                self.timer.reset()
+
+            if self.type == VisualizerTypes.BouncingSquare:
+                for rec in self.objects:
+                    rec.random_move(flux, flux_max, flush=True)
+
+        if self.type == VisualizerTypes.Magnituder:
+            self.magnituder.show(self.hex_array, flux, flux_max)
         #
         # # print('updating visuals time: ', self.timer.measure_total())
         #
@@ -95,7 +98,6 @@ class Visualizer:
         self.hex_array, self.curr_off_pixels = self.backgrounder.modulate_color(self.curr_color, centroid, rms, entropy)
         self.curr_object_pixels = self.get_object_pixels()
         self.draw_whole_background(self.curr_object_pixels, self.curr_off_pixels)
-        self.timer.reset()
         for o in self.objects:
             o.redraw()
 
@@ -154,6 +156,17 @@ class Visualizer:
                             self.strip.setPixelColor(i, o.color)
             i += 1
         self.strip.show()
+
+    def next_visualizer_type(self):
+        if self.type == VisualizerTypes.BouncingSquare:
+            self.type = VisualizerTypes.Magnituder
+            self.objects = None
+        elif self.type == VisualizerTypes.Magnituder:
+            self.type = VisualizerTypes.Rasta
+            self.objects = self.rasta_shower
+        else:
+            self.type = VisualizerTypes.BouncingSquare
+            self.objects = self.rec
 
 
 def should_trigger_movement(flux, flux_max, energy_delta):
