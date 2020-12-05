@@ -24,7 +24,7 @@ class VisualizerTypes:
 
 
 class Visualizer:
-    def __init__(self, feature_list, std, led_strip, vis_type=VisualizerTypes.Rasta):
+    def __init__(self, feature_list, std, led_strip, vis_type=VisualizerTypes.BouncingSquare):
         self.matrix_size = (15, 20)
         self.backgrounder = Backgrounder(std, self.matrix_size)
         self.curr_off_pixels = []
@@ -42,7 +42,6 @@ class Visualizer:
 
         self.numpixels = 300
         self.strip = led_strip
-        self.recArray = self.get_rectangle_array()
         self.rec = Rectangle(visualizer=self, coordinate=(10, 6), size=(3, 3), led_strip=self.strip, color=yellow)
         if self.type == VisualizerTypes.BouncingSquare:
             self.objects = [self.rec]
@@ -72,14 +71,17 @@ class Visualizer:
         self.update_palette(centroid, rms, hnr)
 
         if should_trigger_movement(flux, flux_max, energy_delta):
-            if self.timer.measure_total() > 15:
+            if self.timer.measure_total() > 3 * 60:
                 print('updating visuals')
                 self.next_visualizer_type()
                 self.timer.reset()
 
-            if self.type == VisualizerTypes.BouncingSquare or self.type == VisualizerTypes.MultiBouncingSquare:
-                for rec in self.objects:
-                    rec.random_move(flux, flux_max, flush=True)
+            if self.is_bouncing_squares():
+                if self.timer.measure_tick() > 10:
+                    self.initiate_switch_bounce(flux, flux_max)
+                else:
+                    for rec in self.objects:
+                        rec.random_move(flux, flux_max, flush=True)
 
         if self.type == VisualizerTypes.Magnituder:
             self.magnituder.show(self.hex_array, flux, flux_max)
@@ -166,39 +168,59 @@ class Visualizer:
 
     def next_visualizer_type(self):
         if self.type == VisualizerTypes.BouncingSquare:
-            self.type = VisualizerTypes.MultiBouncingSquare
-            self.objects = self.get_rectangle_array()
+            self.update_visualizer_type(VisualizerTypes.MultiBouncingSquare)
         elif self.type == VisualizerTypes.MultiBouncingSquare:
+            self.update_visualizer_type(VisualizerTypes.Magnituder)
+        elif self.type == VisualizerTypes.Magnituder:
+            self.update_visualizer_type(VisualizerTypes.Rasta)
+        else:
+            self.update_visualizer_type(VisualizerTypes.BouncingSquare)
+
+    def update_visualizer_type(self, new_type):
+        if new_type == VisualizerTypes.BouncingSquare:
+            self.type = VisualizerTypes.BouncingSquare
+            self.objects = [self.rec]
+        elif new_type == VisualizerTypes.MultiBouncingSquare:
+            self.type = VisualizerTypes.MultiBouncingSquare
+            self.objects = self.get_rectangle_array(self.rec.x, self.rec.y)
+        elif new_type == VisualizerTypes.Magnituder:
             self.type = VisualizerTypes.Magnituder
             self.objects = []
-        elif self.type == VisualizerTypes.Magnituder:
+        elif new_type == VisualizerTypes.Rasta:
             self.type = VisualizerTypes.Rasta
             self.objects = [self.rasta_shower]
         else:
             self.type = VisualizerTypes.BouncingSquare
             self.objects = [self.rec]
 
-    def get_rectangle_array(self):
-        return [Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
-                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow)
-                ]
+    def initiate_switch_bounce(self, flux, flux_max):
+        if self.type == VisualizerTypes.MultiBouncingSquare:
+            if self.all_objects_at(self.rec.x, self.rec.y):
+                self.update_visualizer_type(VisualizerTypes.BouncingSquare)
+                self.timer.set_tick()
+            else:
+                self.all_objects_approach(self.rec.x, self.rec.y, flux, flux_max)
+
+        else:
+            self.update_visualizer_type(VisualizerTypes.MultiBouncingSquare)
+            self.timer.set_tick()
+
+    def is_bouncing_squares(self):
+        return self.type == VisualizerTypes.BouncingSquare or self.type == VisualizerTypes.MultiBouncingSquare
+
+    def all_objects_at(self, x, y):
+        for rec in self.objects:
+            if not rec.is_at(x, y):
+                return False
+
+        return True
+
+    def all_objects_approach(self, x, y, flux, flux_max):
+        [rec.approach(x, y, flux, flux_max) for rec in self.objects]
+
+    def get_rectangle_array(self, x, y):
+        return [Rectangle(visualizer=self, coordinate=(x, y), size=(1, 1), led_strip=self.strip, color=yellow)
+                for _ in range(20)]
 
 
 def should_trigger_movement(flux, flux_max, energy_delta):

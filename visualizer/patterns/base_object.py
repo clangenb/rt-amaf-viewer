@@ -64,6 +64,25 @@ class BaseObject:
                 self.movements.put((self.move_right, amount, attack))
                 self.movements.put((self.move_left, amount, release, True))
 
+    def is_at(self, x, y):
+        return self.x == x and self.y == y
+
+    def approach(self, x, y, flux, flux_max):
+        delta_x = abs(self.x - x)
+        delta_y = abs(self.y - y)
+        amount = self.get_bounce_amount(flux, flux_max)
+
+        if delta_x > delta_y:
+            if self.x > x:
+                self.move_left(min(delta_x, amount))  # use min to not pass target position
+            else:
+                self.move_right(min(delta_x, amount))
+        else:
+            if self.y > y:
+                self.move_down(min(delta_y, amount))
+            else:
+                self.move_up(min(delta_y, amount))
+
     def random_move(self, flux, flux_max, flush=True):
         amount = self.get_bounce_amount(flux, flux_max)
         attack = 0.01
@@ -75,7 +94,7 @@ class BaseObject:
             elif direction == 'down':
                 self.movements.put((self.move_down, amount, attack, flush))
             elif direction == 'left':
-                self.movements.put((self.move_left, amount, attack,flush))
+                self.movements.put((self.move_left, amount, attack, flush))
             else:
                 self.movements.put((self.move_right, amount, attack, flush))
 
