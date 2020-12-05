@@ -28,7 +28,7 @@ def get_emotion_color(arousal, valence):
         s = 1
 
     h, s, v = np.clip([hue, s, v], a_min=0, a_max=1).flatten()
-    return hsv_to_rgb((h, s, v))
+    return hsv_to_rgb(clamp_hsv(h, s, v))
 
 
 def get_emotion_std(arousal, valence):
@@ -127,3 +127,15 @@ def to_hex_color(color, is_rgb=True):
 
 def clamp(color_rgb):
     return max(0, min(int(255*color_rgb), 255))
+
+
+def clamp_hsv(h, s, v, value_saturation=0.3):
+    if h > 1:
+        h = 1
+    if s > 1:
+        s = 1
+    if v > value_saturation:
+        v = value_saturation
+    if s < 0.3:   # it's no fun if everything's just white
+        s = 0.3
+    return h, s, v

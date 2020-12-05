@@ -24,7 +24,7 @@ class VisualizerTypes:
 
 
 class Visualizer:
-    def __init__(self, feature_list, std, led_strip, vis_type=VisualizerTypes.BouncingSquare):
+    def __init__(self, feature_list, std, led_strip, vis_type=VisualizerTypes.Rasta):
         self.matrix_size = (15, 20)
         self.backgrounder = Backgrounder(std, self.matrix_size)
         self.curr_off_pixels = []

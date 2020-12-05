@@ -51,7 +51,7 @@ class Backgrounder:
         if rms > 0:
             v *= self.get_v_factor(rms, self.rms_mean, self.rms_max)
 
-        h, s, v = clamp_hsv(h, s, v)
+        h, s, v = cbf.clamp_hsv(h, s, v)
         # self._s = _update_mean(self._s, s, 0.99)
         # self._v = _update_mean(self._v, v, 0.9999)
         self._s = _update_mean(self._s, s, 0.75)
@@ -94,15 +94,3 @@ class Backgrounder:
 
 def _update_mean(mean_old, x_n, decay):
     return decay*mean_old + (1 - decay)*x_n
-
-
-def clamp_hsv(h, s, v):
-    if h > 1:
-        h = 1
-    if s > 1:
-        s = 1
-    if v > 0.1:
-        v = 0.1
-    if s < 0.3:   # it's no fun if everything's just white
-        s = 0.3
-    return h, s, v
