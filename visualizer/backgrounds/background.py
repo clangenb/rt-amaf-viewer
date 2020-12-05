@@ -101,8 +101,8 @@ def clamp_hsv(h, s, v):
         h = 1
     if s > 1:
         s = 1
-    if v > 1:
-        v = 1
+    if v > 0.1:
+        v = 0.1
     if s < 0.3:   # it's no fun if everything's just white
         s = 0.3
     return h, s, v

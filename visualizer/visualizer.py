@@ -17,7 +17,8 @@ config_file = "visualizer_conf.ini"
 
 
 class VisualizerTypes:
-    BouncingSquare = "Normal"
+    BouncingSquare = "Normal",
+    MultiBouncingSquare = "multi"
     Rasta = "rasta"
     Magnituder = "magnituder"
 
@@ -41,6 +42,7 @@ class Visualizer:
 
         self.numpixels = 300
         self.strip = led_strip
+        self.recArray = self.get_rectangle_array()
         self.rec = Rectangle(visualizer=self, coordinate=(10, 6), size=(3, 3), led_strip=self.strip, color=yellow)
         if self.type == VisualizerTypes.BouncingSquare:
             self.objects = [self.rec]
@@ -65,15 +67,17 @@ class Visualizer:
             self.update_rastas(llds)
 
         flux, centroid, rms, entropy, flux_max, energy_max, \
-            energy_delta, spec_rolloff, hnr = self.enabled_features.get_features(self.feature_maxima, llds)
+        energy_delta, spec_rolloff, hnr = self.enabled_features.get_features(self.feature_maxima, llds)
 
         self.update_palette(centroid, rms, hnr)
+
         if should_trigger_movement(flux, flux_max, energy_delta):
-            if self.timer.measure_total() > 60:
+            if self.timer.measure_total() > 15:
+                print('updating visuals')
                 self.next_visualizer_type()
                 self.timer.reset()
 
-            if self.type == VisualizerTypes.BouncingSquare:
+            if self.type == VisualizerTypes.BouncingSquare or self.type == VisualizerTypes.MultiBouncingSquare:
                 for rec in self.objects:
                     rec.random_move(flux, flux_max, flush=True)
 
@@ -96,6 +100,9 @@ class Visualizer:
 
     def update_palette(self, centroid, rms, entropy):
         self.hex_array, self.curr_off_pixels = self.backgrounder.modulate_color(self.curr_color, centroid, rms, entropy)
+        # if self.type == VisualizerTypes.BouncingSquare or self.type == VisualizerTypes.MultiBouncingSquare:
+        #     self.curr_off_pixels = set(range(300))
+
         self.curr_object_pixels = self.get_object_pixels()
         self.draw_whole_background(self.curr_object_pixels, self.curr_off_pixels)
         for o in self.objects:
@@ -159,15 +166,40 @@ class Visualizer:
 
     def next_visualizer_type(self):
         if self.type == VisualizerTypes.BouncingSquare:
+            self.type = VisualizerTypes.MultiBouncingSquare
+            self.objects = self.get_rectangle_array()
+        elif self.type == VisualizerTypes.MultiBouncingSquare:
             self.type = VisualizerTypes.Magnituder
-            self.objects = None
+            self.objects = []
         elif self.type == VisualizerTypes.Magnituder:
             self.type = VisualizerTypes.Rasta
-            self.objects = self.rasta_shower
+            self.objects = [self.rasta_shower]
         else:
             self.type = VisualizerTypes.BouncingSquare
-            self.objects = self.rec
+            self.objects = [self.rec]
+
+    def get_rectangle_array(self):
+        return [Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow),
+                Rectangle(visualizer=self, coordinate=(10, 6), size=(1, 1), led_strip=self.strip, color=yellow)
+                ]
 
 
 def should_trigger_movement(flux, flux_max, energy_delta):
-    return (flux > flux_max / 3) and (energy_delta > 0.007)
+    return (flux > flux_max / 5) and (energy_delta > 0.001)

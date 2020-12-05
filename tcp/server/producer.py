@@ -59,7 +59,7 @@ class Producer(object):
                 self.reduce_queue_size(self.arousal)
                 self.reduce_queue_size(self.valence)
 
-                if timer.measure_total() > 2:
+                if timer.measure_total() > 0.5:
                     timer.reset()
                     update_base_color_counter = 0
                     a = np.float(self.arousal.get() / 1000)
