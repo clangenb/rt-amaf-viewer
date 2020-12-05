@@ -49,9 +49,10 @@ class Producer(object):
             self._p.start_predicting(self.funcs, self.arousal, self.valence)
 
         while not self._paused:
-            # if self.timer.measure_total() > 15:
-            #     time.sleep(0.5)
-            #     self.reduce_queue_size(self.llds)
+            if self.timer.measure_total() > 60:
+                self.timer.reset()
+                time.sleep(0.5)
+                self.reduce_queue_size(self.llds)
 
             if not self.llds.empty():
                 # print('LLds queue size', llds.qsize())
