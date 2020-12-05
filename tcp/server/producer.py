@@ -29,6 +29,7 @@ class Producer(object):
         self.arousal = Queue()
         self.valence = Queue()
         self.visualizer = None
+        self.timer = TimeQuantizer()
 
     def resumeProducing(self):
         self._paused = False
@@ -47,8 +48,11 @@ class Producer(object):
 
             self._p.start_predicting(self.funcs, self.arousal, self.valence)
 
-        timer = TimeQuantizer()
         while not self._paused:
+            # if self.timer.measure_total() > 15:
+            #     time.sleep(0.5)
+            #     self.reduce_queue_size(self.llds)
+
             if not self.llds.empty():
                 # print('LLds queue size', llds.qsize())
                 self.reduce_queue_size(self.llds)
@@ -59,8 +63,8 @@ class Producer(object):
                 self.reduce_queue_size(self.arousal)
                 self.reduce_queue_size(self.valence)
 
-                if timer.measure_total() > 0.5:
-                    timer.reset()
+                if self.timer.measure_tick() > 5:
+                    self.timer.set_tick()
                     update_base_color_counter = 0
                     a = np.float(self.arousal.get() / 1000)
                     v = np.float(self.valence.get() / 1000)
@@ -72,7 +76,7 @@ class Producer(object):
     @staticmethod
     def reduce_queue_size(queue):
         if queue.qsize() > 5:
-            for _ in range(4):
+            for _ in range(queue.qsize()-1):
                 queue.get()
 
     def pauseProducing(self):
