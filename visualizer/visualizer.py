@@ -71,7 +71,7 @@ class Visualizer:
         self.update_palette(centroid, rms, hnr)
 
         if should_trigger_movement(flux, flux_max, energy_delta):
-            if self.timer.measure_total() > 3 * 60:
+            if self.timer.measure_total() > 5 * 60:
                 print('updating visuals')
                 self.next_visualizer_type()
                 self.timer.reset()
@@ -167,9 +167,7 @@ class Visualizer:
         self.strip.show()
 
     def next_visualizer_type(self):
-        if self.type == VisualizerTypes.BouncingSquare:
-            self.update_visualizer_type(VisualizerTypes.MultiBouncingSquare)
-        elif self.type == VisualizerTypes.MultiBouncingSquare:
+        if self.is_bouncing_squares():
             self.update_visualizer_type(VisualizerTypes.Magnituder)
         elif self.type == VisualizerTypes.Magnituder:
             self.update_visualizer_type(VisualizerTypes.Rasta)
